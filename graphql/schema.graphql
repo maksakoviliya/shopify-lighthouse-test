@@ -1,5 +1,5 @@
 type Query {
-    products: [Product!]! @field(resolver: "App\\GraphQL\\Queries\\ProductsQuery")
+    products(first: Int = 10, after: String): [Product!]! @field(resolver: "App\\GraphQL\\Queries\\ProductsQuery")
     shop: Shop! @field(resolver: "App\\GraphQL\\Queries\\ShopQuery")
 }
 

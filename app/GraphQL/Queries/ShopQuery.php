@@ -4,33 +4,26 @@ declare(strict_types=1);
 
 namespace App\GraphQL\Queries;
 
-use App\Services\ShopifyService;
-use Illuminate\Http\Client\ConnectionException;
+use App\GraphQL\Queries\Contracts\ShopifyQuery;
+use Illuminate\Support\Arr;
 
-final readonly class ShopQuery
+final class ShopQuery extends ShopifyQuery
 {
-	public function __construct(
-		protected ShopifyService $shopify
-	) {
-	}
-
-	/**
-	 * @throws ConnectionException
-	 */
-	public function __invoke(): array
+	public function getQuery(): string
 	{
-		$query = <<<'GQL'
+		return <<<'GQL'
         {
             shop {
                 name
             }
         }
         GQL;
+	}
 
-		$data = $this->shopify->graphql($query);
-
+	public function resolve(array $data): array
+	{
 		return [
-			'name' => $data['shop']['name'] ?? null,
+			'name' => Arr::get($data, 'shop.name'),
 		];
 	}
 }

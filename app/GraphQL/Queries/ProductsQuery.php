@@ -4,35 +4,49 @@ declare(strict_types=1);
 
 namespace App\GraphQL\Queries;
 
-use App\Services\ShopifyService;
-use Illuminate\Http\Client\ConnectionException;
+use App\GraphQL\Queries\Contracts\ShopifyQuery;
+use Illuminate\Support\Arr;
 
-final readonly class ProductsQuery
+final class ProductsQuery extends ShopifyQuery
 {
-	public function __construct(protected ShopifyService $shopifyService)
+	public function getQuery(): string
 	{
-	}
-
-	/**
-	 * @throws ConnectionException
-	 */
-	public function __invoke(): array
-	{
-		$query = <<<GQL
-        {
-            products(first: 3) {
+		return <<<'GQL'
+        query GetProducts($first: Int!, $after: String) {
+            products(first: $first, after: $after) {
                 edges {
                     node {
                         id
                         title
-                        handle
+                        description
                     }
+                }
+                pageInfo {
+                    hasNextPage
+                    endCursor
                 }
             }
         }
         GQL;
+	}
 
-		$data = $this->shopifyService->graphql($query);
-		return collect($data['products']['edges'] ?? [])->map(fn($e) => $e['node'])->toArray();
+	protected function getVariables(array|null $args): array
+	{
+		$variables = [
+			'first' => Arr::get($args, 'first', 10)
+		];
+
+		if (!empty($args['after'])) {
+			$variables['after'] = $args['after'];
+		}
+
+		return $variables;
+	}
+
+	public function resolve(array $data): array
+	{
+		return collect(Arr::get($data, 'products.edges', []))
+			->map(fn($item) => Arr::get($item, 'node'))
+			->toArray();
 	}
 }

@@ -7,6 +7,7 @@ namespace App\Services;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class ShopifyService
@@ -53,6 +54,12 @@ class ShopifyService
 	 */
 	public function graphql(string $query, array $variables = []): array
 	{
+		Log::debug('grq', [
+			'data' => json_encode([
+				'query' => $query,
+				'variables' => (object) $variables,
+			])
+		]);
 		$response = Http::withHeaders([
 			'X-Shopify-Access-Token' => $this->getToken(),
 			'Content-Type' => 'application/json',
@@ -61,7 +68,7 @@ class ShopifyService
 				'query' => $query,
 				'variables' => (object) $variables,
 			]),
-		)->post("https://$this->shop/admin/api/2025-01/graphql.json");
+		)->post("https://$this->shop/admin/api/2026-01/graphql.json");
 
 		if (!$response->successful()) {
 			throw new RuntimeException(
