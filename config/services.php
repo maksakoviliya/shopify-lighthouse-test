@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+	
+	'shopify' => [
+		'shop' => env('SHOPIFY_SHOP'),
+		'client_id' => env('SHOPIFY_CLIENT_ID'),
+		'client_secret' => env('SHOPIFY_CLIENT_SECRET'),
+	],
 ];
