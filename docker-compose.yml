@@ -1,0 +1,54 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=shopify
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=secret
+    depends_on:
+      - postgres
+    networks:
+      - app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NUXT_PUBLIC_GRAPHQL_URL=http://localhost:8000/graphql
+    networks:
+      - app
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: shopify
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app
+
+volumes:
+  postgres_data:
+
+networks:
+  app:
+    driver: bridge
